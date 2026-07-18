@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Waypoint</title>
+<meta name="theme-color" content="#1B1D19">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Waypoint">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders:wght@600;700&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="topo-bg" aria-hidden="true"></div>
+
+<header class="app-header">
+  <div class="brand">
+    <span class="brand-mark">▲</span>
+    <h1>Waypoint</h1>
+  </div>
+  <button id="viewToggle" class="view-toggle" aria-label="Toggle all-in-one view">
+    <span class="vt-label">All</span>
+  </button>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-view="today">Today</button>
+  <button class="tab" data-view="week">Week</button>
+  <button class="tab" data-view="month">Month</button>
+  <button class="tab" data-view="goals">Goals</button>
+</nav>
+
+<main id="main">
+
+  <section class="view" id="view-today" data-view="today">
+    <div class="section-head">
+      <h2>Today</h2>
+      <span class="section-sub" id="todayDate"></span>
+    </div>
+    <div class="add-row">
+      <input type="text" id="todayInput" placeholder="Add a task for today" maxlength="140">
+      <button class="add-btn" id="todayAdd" aria-label="Add task">+</button>
+    </div>
+    <select class="goal-link" id="todayGoalLink">
+      <option value="">No linked goal</option>
+    </select>
+    <ul class="task-list" id="todayList"></ul>
+    <p class="empty-state" id="todayEmpty">Nothing on the trail today. Add your first step.</p>
+  </section>
+
+  <section class="view" id="view-week" data-view="week">
+    <div class="section-head">
+      <h2>This week</h2>
+      <span class="section-sub">running focus list</span>
+    </div>
+    <div class="add-row">
+      <input type="text" id="weekInput" placeholder="Add a focus for this week" maxlength="140">
+      <button class="add-btn" id="weekAdd" aria-label="Add task">+</button>
+    </div>
+    <select class="goal-link" id="weekGoalLink">
+      <option value="">No linked goal</option>
+    </select>
+    <ul class="task-list" id="weekList"></ul>
+    <p class="empty-state" id="weekEmpty">No weekly focus set yet.</p>
+  </section>
+
+  <section class="view" id="view-month" data-view="month">
+    <div class="section-head">
+      <h2>This month</h2>
+      <span class="section-sub">milestones</span>
+    </div>
+    <div class="add-row">
+      <input type="text" id="monthInput" placeholder="Add a milestone for this month" maxlength="140">
+      <button class="add-btn" id="monthAdd" aria-label="Add task">+</button>
+    </div>
+    <select class="goal-link" id="monthGoalLink">
+      <option value="">No linked goal</option>
+    </select>
+    <ul class="task-list" id="monthList"></ul>
+    <p class="empty-state" id="monthEmpty">No milestones set for this month.</p>
+  </section>
+
+  <section class="view" id="view-goals" data-view="goals">
+    <div class="section-head">
+      <h2>Goals</h2>
+      <span class="section-sub">the long trail</span>
+    </div>
+    <div class="add-row">
+      <input type="text" id="goalInput" placeholder="Add a long-term goal" maxlength="140">
+      <button class="add-btn" id="goalAdd" aria-label="Add goal">+</button>
+    </div>
+    <ul class="goal-list" id="goalList"></ul>
+    <p class="empty-state" id="goalEmpty">No goals set yet. Plant your first flag.</p>
+  </section>
+
+</main>
+
+<div class="sync-dot" id="syncDot" title="Sync status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

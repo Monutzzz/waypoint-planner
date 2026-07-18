@@ -25,7 +25,7 @@ html, body {
 }
 
 body {
-  padding-bottom: 48px;
+  padding-bottom: calc(48px + env(safe-area-inset-bottom));
   position: relative;
 }
 
@@ -46,7 +46,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22px 20px 8px;
+  padding: calc(22px + env(safe-area-inset-top)) 20px 8px;
 }
 
 .brand { display: flex; align-items: center; gap: 8px; }
@@ -382,7 +382,7 @@ body.all-mode .view:last-child { border-bottom: none; }
 
 .sync-dot {
   position: fixed;
-  bottom: 14px;
+  bottom: calc(14px + env(safe-area-inset-bottom));
   right: 14px;
   width: 8px;
   height: 8px;

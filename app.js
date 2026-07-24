@@ -349,7 +349,7 @@ function applyMode(mode, resetAll) {
   if (allMode) {
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.mode === mode));
   } else {
-    const firstTab = document.querySelector(`.tab[data-mode="${mode}"]`);
+    const firstTab = document.querySelector(`#tabs .tab[data-mode="${mode}"]`);
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     firstTab.classList.add('active');
@@ -386,7 +386,7 @@ viewToggle.addEventListener('click', () => {
     document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.mode === currentMode));
   } else {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const firstTab = document.querySelector(`.tab[data-mode="${currentMode}"]`);
+    const firstTab = document.querySelector(`#tabs .tab[data-mode="${currentMode}"]`);
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     firstTab.classList.add('active');
     document.getElementById('view-' + firstTab.dataset.view).classList.add('active');

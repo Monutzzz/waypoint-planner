@@ -99,6 +99,24 @@ body {
   color: #14150F;
 }
 
+.goal-icon-btn {
+  flex: none;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+  font-size: 15px;
+  padding: 7px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.goal-icon-btn.active {
+  background: var(--blaze-dim);
+  border-color: var(--blaze);
+  color: var(--ink);
+}
+
 .view-toggle {
   background: var(--panel);
   border: 1px solid var(--line);
@@ -479,7 +497,8 @@ body.all-mode .view:last-child { border-bottom: none; }
   .brand h1 { font-size: 18px; }
   .section-head h2 { font-size: 22px; }
   .app-header { padding-left: 16px; padding-right: 16px; }
-  .header-controls { gap: 6px; }
-  .mode-btn { padding: 6px 9px; font-size: 10px; }
+  .header-controls { gap: 5px; }
+  .mode-btn { padding: 6px 8px; font-size: 10px; }
   .view-toggle { padding: 7px 10px; }
+  .goal-icon-btn { padding: 6px 9px; font-size: 13px; }
 }

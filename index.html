@@ -22,21 +22,29 @@
     <span class="brand-mark">▲</span>
     <h1>Waypoint</h1>
   </div>
-  <button id="viewToggle" class="view-toggle" aria-label="Toggle all-in-one view">
-    <span class="vt-label">All</span>
-  </button>
+  <div class="header-controls">
+    <div class="mode-switch" id="modeSwitch">
+      <button class="mode-btn active" data-mode="personal">Personal</button>
+      <button class="mode-btn" data-mode="work">Work</button>
+    </div>
+    <button id="viewToggle" class="view-toggle" aria-label="Toggle all-in-one view">
+      <span class="vt-label">All</span>
+    </button>
+  </div>
 </header>
 
 <nav class="tabs" id="tabs">
-  <button class="tab active" data-view="today">Today</button>
-  <button class="tab" data-view="week">Week</button>
-  <button class="tab" data-view="month">Month</button>
-  <button class="tab" data-view="goals">Goals</button>
+  <button class="tab active" data-view="today" data-mode="personal">Today</button>
+  <button class="tab" data-view="week" data-mode="personal">Week</button>
+  <button class="tab" data-view="month" data-mode="personal">Month</button>
+  <button class="tab" data-view="goals" data-mode="personal">Goals</button>
+  <button class="tab" data-view="worknow" data-mode="work">Tasks</button>
+  <button class="tab" data-view="worklater" data-mode="work">Later</button>
 </nav>
 
 <main id="main">
 
-  <section class="view active" id="view-today" data-view="today">
+  <section class="view active" id="view-today" data-view="today" data-mode="personal">
     <div class="section-head">
       <h2>Today</h2>
       <span class="section-sub" id="todayDate"></span>
@@ -52,7 +60,7 @@
     <p class="empty-state" id="todayEmpty">Nothing on the trail today. Add your first step.</p>
   </section>
 
-  <section class="view" id="view-week" data-view="week">
+  <section class="view" id="view-week" data-view="week" data-mode="personal">
     <div class="section-head">
       <h2>This week</h2>
       <span class="section-sub">running focus list</span>
@@ -68,7 +76,7 @@
     <p class="empty-state" id="weekEmpty">No weekly focus set yet.</p>
   </section>
 
-  <section class="view" id="view-month" data-view="month">
+  <section class="view" id="view-month" data-view="month" data-mode="personal">
     <div class="section-head">
       <h2>This month</h2>
       <span class="section-sub">milestones</span>
@@ -84,7 +92,7 @@
     <p class="empty-state" id="monthEmpty">No milestones set for this month.</p>
   </section>
 
-  <section class="view" id="view-goals" data-view="goals">
+  <section class="view" id="view-goals" data-view="goals" data-mode="personal">
     <div class="section-head">
       <h2>Goals</h2>
       <span class="section-sub">the long trail</span>
@@ -95,6 +103,32 @@
     </div>
     <ul class="goal-list" id="goalList"></ul>
     <p class="empty-state" id="goalEmpty">No goals set yet. Plant your first flag.</p>
+  </section>
+
+  <section class="view" id="view-worknow" data-view="worknow" data-mode="work">
+    <div class="section-head">
+      <h2>Tasks</h2>
+      <span class="section-sub">on deck now</span>
+    </div>
+    <div class="add-row">
+      <input type="text" id="worknowInput" placeholder="Add a work task" maxlength="140">
+      <button class="add-btn" id="worknowAdd" aria-label="Add task">+</button>
+    </div>
+    <ul class="task-list" id="worknowList"></ul>
+    <p class="empty-state" id="worknowEmpty">Nothing queued up right now.</p>
+  </section>
+
+  <section class="view" id="view-worklater" data-view="worklater" data-mode="work">
+    <div class="section-head">
+      <h2>Later</h2>
+      <span class="section-sub">backlog</span>
+    </div>
+    <div class="add-row">
+      <input type="text" id="worklaterInput" placeholder="Add something for later" maxlength="140">
+      <button class="add-btn" id="worklaterAdd" aria-label="Add task">+</button>
+    </div>
+    <ul class="task-list" id="worklaterList"></ul>
+    <p class="empty-state" id="worklaterEmpty">Backlog is clear.</p>
   </section>
 
 </main>

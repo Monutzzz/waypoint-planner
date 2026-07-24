@@ -1,6 +1,6 @@
 // ---- Supabase setup ----
-const SUPABASE_URL = 'https://hmxjngqxmesqixuxmoel.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhteGpuZ3F4bWVzcWl4dXhtb2VsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzMzk3NzksImV4cCI6MjA5OTkxNTc3OX0.CVnN_SF81KXbC_1xIWPQRLuzUZE9Ue9NRhAQj5uKRCk';
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const syncDot = document.getElementById('syncDot');
@@ -11,24 +11,32 @@ function setSync(state) {
 
 let goals = [];
 let tasks = [];
+let currentMode = 'personal';
+let allMode = false;
 
 // ---- Date helpers ----
 function todayStr() {
-  return new Date().toISOString().slice(0, 10);
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
 }
 
 // ---- Load data ----
 async function loadAll() {
   setSync(null);
   try {
-    const [{ data: g, error: ge }, { data: t, error: te }] = await Promise.all([
+    const [{ data: g, error: ge }, { data: t, error: te }, { data: s, error: se }] = await Promise.all([
       sb.from('goals').select('*').order('created_at', { ascending: true }),
-      sb.from('tasks').select('*').order('created_at', { ascending: true })
+      sb.from('tasks').select('*').order('created_at', { ascending: true }),
+      sb.from('app_settings').select('*').eq('id', 1).single()
     ]);
     if (ge || te) throw ge || te;
     goals = g || [];
     tasks = t || [];
     setSync('ok');
+    if (!se && s) applyMode(s.mode, false);
     renderAll();
   } catch (err) {
     console.error(err);
@@ -36,12 +44,19 @@ async function loadAll() {
   }
 }
 
+async function setModeRemote(mode) {
+  const { error } = await sb.from('app_settings').update({ mode }).eq('id', 1);
+  if (error) { console.error(error); setSync('err'); }
+}
+
 // ---- Rendering ----
 function renderAll() {
   populateGoalLinks();
-  renderTaskList('daily', 'todayList', 'todayEmpty', t => t.due_date === todayStr());
+  renderTaskList('daily', 'todayList', 'todayEmpty', t => t.due_date === todayStr() || (!t.done && t.due_date && t.due_date < todayStr()));
   renderTaskList('weekly', 'weekList', 'weekEmpty');
   renderTaskList('monthly', 'monthList', 'monthEmpty');
+  renderTaskList('work_now', 'worknowList', 'worknowEmpty');
+  renderTaskList('work_later', 'worklaterList', 'worklaterEmpty');
   renderGoals();
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 }
@@ -76,12 +91,14 @@ function renderTaskList(timeframe, listId, emptyId, extraFilter) {
 
 function taskItemHtml(t) {
   const goal = goals.find(g => g.id === t.goal_id);
+  const overdue = t.timeframe === 'daily' && t.due_date && t.due_date < todayStr() && !t.done;
   return `
     <li class="task-item ${t.done ? 'done' : ''}">
       <div class="check ${t.done ? 'done' : ''}" data-id="${t.id}"></div>
       <div class="task-body">
         <div class="task-title">${escapeHtml(t.title)}</div>
         ${goal ? `<span class="task-goal-tag">${escapeHtml(goal.title)}</span>` : ''}
+        ${overdue ? `<span class="task-overdue-tag">carried over</span>` : ''}
       </div>
       <button class="task-del" data-id="${t.id}" aria-label="Delete">×</button>
     </li>`;
@@ -200,9 +217,58 @@ document.getElementById('goalAdd').addEventListener('click', () => {
 });
 document.getElementById('goalInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('goalAdd').click(); });
 
+document.getElementById('worknowAdd').addEventListener('click', () => {
+  const input = document.getElementById('worknowInput');
+  addTask('work_now', input.value, null, null);
+  input.value = '';
+});
+document.getElementById('worknowInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('worknowAdd').click(); });
+
+document.getElementById('worklaterAdd').addEventListener('click', () => {
+  const input = document.getElementById('worklaterInput');
+  addTask('work_later', input.value, null, null);
+  input.value = '';
+});
+document.getElementById('worklaterInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('worklaterAdd').click(); });
+
+// ---- Mode switching ----
+function applyMode(mode, resetAll) {
+  currentMode = mode;
+
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('hidden-tab', t.dataset.mode !== mode);
+  });
+
+  if (resetAll) {
+    allMode = false;
+    document.body.classList.remove('all-mode');
+    viewToggle.classList.remove('active');
+  }
+  document.getElementById('tabs').classList.toggle('hidden', allMode);
+
+  if (allMode) {
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.mode === mode));
+  } else {
+    const firstTab = document.querySelector(`.tab[data-mode="${mode}"]`);
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    firstTab.classList.add('active');
+    document.getElementById('view-' + firstTab.dataset.view).classList.add('active');
+  }
+}
+
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    applyMode(btn.dataset.mode, true);
+    setModeRemote(btn.dataset.mode);
+  });
+});
+
 // ---- Tab switching ----
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
+    if (tab.dataset.mode !== currentMode) return;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     tab.classList.add('active');
     const view = tab.dataset.view;
@@ -212,21 +278,22 @@ document.querySelectorAll('.tab').forEach(tab => {
 
 // ---- All-mode toggle ----
 const viewToggle = document.getElementById('viewToggle');
-let allMode = false;
 viewToggle.addEventListener('click', () => {
   allMode = !allMode;
   document.body.classList.toggle('all-mode', allMode);
   document.getElementById('tabs').classList.toggle('hidden', allMode);
   viewToggle.classList.toggle('active', allMode);
   if (allMode) {
-    document.querySelectorAll('.view').forEach(v => v.classList.add('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.dataset.mode === currentMode));
   } else {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-today').classList.add('active');
+    const firstTab = document.querySelector(`.tab[data-mode="${currentMode}"]`);
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelector('.tab[data-view="today"]').classList.add('active');
+    firstTab.classList.add('active');
+    document.getElementById('view-' + firstTab.dataset.view).classList.add('active');
   }
 });
 
 // ---- Init ----
+applyMode(currentMode, false);
 loadAll();

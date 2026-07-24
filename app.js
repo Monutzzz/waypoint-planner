@@ -87,6 +87,38 @@ function renderTaskList(timeframe, listId, emptyId, extraFilter) {
   list.querySelectorAll('.task-del').forEach(el => {
     el.addEventListener('click', () => deleteTask(el.dataset.id));
   });
+  list.querySelectorAll('.task-edit').forEach(el => {
+    el.addEventListener('click', () => startEditTask(el.dataset.id));
+  });
+}
+
+function startEditTask(id) {
+  const titleEl = document.querySelector(`.task-title[data-id="${id}"]`);
+  if (!titleEl) return;
+  const t = tasks.find(t => t.id === id);
+  if (!t) return;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'task-edit-input';
+  input.value = t.title;
+  input.maxLength = 140;
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const newTitle = input.value.trim();
+    if (newTitle && newTitle !== t.title) {
+      t.title = newTitle;
+      updateTaskTitle(id, newTitle);
+    }
+    renderAll();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') { input.removeEventListener('blur', commit); renderAll(); }
+  });
 }
 
 function taskItemHtml(t) {
@@ -95,11 +127,12 @@ function taskItemHtml(t) {
   return `
     <li class="task-item ${t.done ? 'done' : ''}">
       <div class="check ${t.done ? 'done' : ''}" data-id="${t.id}"></div>
-      <div class="task-body">
-        <div class="task-title">${escapeHtml(t.title)}</div>
+      <div class="task-body" data-id="${t.id}">
+        <div class="task-title" data-id="${t.id}">${escapeHtml(t.title)}</div>
         ${goal ? `<span class="task-goal-tag">${escapeHtml(goal.title)}</span>` : ''}
         ${overdue ? `<span class="task-overdue-tag">carried over</span>` : ''}
       </div>
+      <button class="task-edit" data-id="${t.id}" aria-label="Edit">✎</button>
       <button class="task-del" data-id="${t.id}" aria-label="Delete">×</button>
     </li>`;
 }
@@ -123,8 +156,11 @@ function renderGoals() {
     return `
       <li class="goal-card">
         <div class="goal-card-head">
-          <span class="goal-title">${escapeHtml(g.title)}</span>
-          <button class="task-del" data-id="${g.id}" data-goal="1" aria-label="Delete goal">×</button>
+          <span class="goal-title" data-id="${g.id}">${escapeHtml(g.title)}</span>
+          <span class="goal-card-actions">
+            <button class="task-edit" data-id="${g.id}" data-goal="1" aria-label="Edit goal">✎</button>
+            <button class="task-del" data-id="${g.id}" data-goal="1" aria-label="Delete goal">×</button>
+          </span>
         </div>
         <div class="goal-progress-track"><div class="goal-progress-fill" style="width:${pct}%"></div></div>
         <div class="goal-progress-label">${doneCount} / ${linked.length} steps complete</div>
@@ -132,8 +168,40 @@ function renderGoals() {
       </li>`;
   }).join('');
 
-  list.querySelectorAll('[data-goal]').forEach(el => {
+  list.querySelectorAll('.task-del[data-goal]').forEach(el => {
     el.addEventListener('click', () => deleteGoal(el.dataset.id));
+  });
+  list.querySelectorAll('.task-edit[data-goal]').forEach(el => {
+    el.addEventListener('click', () => startEditGoal(el.dataset.id));
+  });
+}
+
+function startEditGoal(id) {
+  const titleEl = document.querySelector(`.goal-title[data-id="${id}"]`);
+  if (!titleEl) return;
+  const g = goals.find(g => g.id === id);
+  if (!g) return;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'task-edit-input';
+  input.value = g.title;
+  input.maxLength = 140;
+  titleEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  const commit = () => {
+    const newTitle = input.value.trim();
+    if (newTitle && newTitle !== g.title) {
+      g.title = newTitle;
+      updateGoalTitle(id, newTitle);
+    }
+    renderAll();
+  };
+  input.addEventListener('blur', commit);
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') input.blur();
+    if (e.key === 'Escape') { input.removeEventListener('blur', commit); renderAll(); }
   });
 }
 
@@ -151,6 +219,16 @@ async function addTask(timeframe, title, goalId, dueDate) {
   if (error) { console.error(error); setSync('err'); return; }
   tasks.push(data);
   renderAll();
+}
+
+async function updateTaskTitle(id, title) {
+  const { error } = await sb.from('tasks').update({ title }).eq('id', id);
+  if (error) { console.error(error); setSync('err'); }
+}
+
+async function updateGoalTitle(id, title) {
+  const { error } = await sb.from('goals').update({ title }).eq('id', id);
+  if (error) { console.error(error); setSync('err'); }
 }
 
 async function toggleTask(id) {

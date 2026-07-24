@@ -23,6 +23,15 @@ function todayStr() {
   return `${y}-${m}-${day}`;
 }
 
+function tomorrowStr() {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 // ---- Load data ----
 async function loadAll() {
   setSync(null);
@@ -53,16 +62,20 @@ async function setModeRemote(mode) {
 function renderAll() {
   populateGoalLinks();
   renderTaskList('daily', 'todayList', 'todayEmpty', t => t.due_date === todayStr() || (!t.done && t.due_date && t.due_date < todayStr()));
+  renderTaskList('daily', 'tomorrowList', 'tomorrowEmpty', t => t.due_date === tomorrowStr());
   renderTaskList('weekly', 'weekList', 'weekEmpty');
   renderTaskList('monthly', 'monthList', 'monthEmpty');
   renderTaskList('work_now', 'worknowList', 'worknowEmpty');
   renderTaskList('work_later', 'worklaterList', 'worklaterEmpty');
   renderGoals();
   document.getElementById('todayDate').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const tmrw = new Date();
+  tmrw.setDate(tmrw.getDate() + 1);
+  document.getElementById('tomorrowDate').textContent = tmrw.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
 }
 
 function populateGoalLinks() {
-  ['today', 'week', 'month'].forEach(view => {
+  ['today', 'tomorrow', 'week', 'month'].forEach(view => {
     const sel = document.getElementById(view + 'GoalLink');
     const current = sel.value;
     sel.innerHTML = '<option value="">No linked goal</option>' +
@@ -271,6 +284,14 @@ document.getElementById('todayAdd').addEventListener('click', () => {
   input.value = '';
 });
 document.getElementById('todayInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('todayAdd').click(); });
+
+document.getElementById('tomorrowAdd').addEventListener('click', () => {
+  const input = document.getElementById('tomorrowInput');
+  const goalId = document.getElementById('tomorrowGoalLink').value;
+  addTask('daily', input.value, goalId, tomorrowStr());
+  input.value = '';
+});
+document.getElementById('tomorrowInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('tomorrowAdd').click(); });
 
 document.getElementById('weekAdd').addEventListener('click', () => {
   const input = document.getElementById('weekInput');

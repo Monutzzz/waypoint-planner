@@ -35,6 +35,7 @@
 
 <nav class="tabs" id="tabs">
   <button class="tab active" data-view="today" data-mode="personal">Today</button>
+  <button class="tab" data-view="tomorrow" data-mode="personal">Tomorrow</button>
   <button class="tab" data-view="week" data-mode="personal">Week</button>
   <button class="tab" data-view="month" data-mode="personal">Month</button>
   <button class="tab" data-view="goals" data-mode="personal">Goals</button>
@@ -58,6 +59,22 @@
     </select>
     <ul class="task-list" id="todayList"></ul>
     <p class="empty-state" id="todayEmpty">Nothing on the trail today. Add your first step.</p>
+  </section>
+
+  <section class="view" id="view-tomorrow" data-view="tomorrow" data-mode="personal">
+    <div class="section-head">
+      <h2>Tomorrow</h2>
+      <span class="section-sub" id="tomorrowDate"></span>
+    </div>
+    <div class="add-row">
+      <input type="text" id="tomorrowInput" placeholder="Add a task for tomorrow" maxlength="140">
+      <button class="add-btn" id="tomorrowAdd" aria-label="Add task">+</button>
+    </div>
+    <select class="goal-link" id="tomorrowGoalLink">
+      <option value="">No linked goal</option>
+    </select>
+    <ul class="task-list" id="tomorrowList"></ul>
+    <p class="empty-state" id="tomorrowEmpty">Nothing planned for tomorrow yet.</p>
   </section>
 
   <section class="view" id="view-week" data-view="week" data-mode="personal">

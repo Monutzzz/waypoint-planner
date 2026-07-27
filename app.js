@@ -32,6 +32,17 @@ function tomorrowStr() {
   return `${y}-${m}-${day}`;
 }
 
+function weekStartStr() {
+  const d = new Date();
+  const dow = d.getDay(); // 0 = Sunday, 1 = Monday...
+  const diffToMonday = dow === 0 ? -6 : 1 - dow;
+  d.setDate(d.getDate() + diffToMonday);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 // ---- Load data ----
 async function loadAll() {
   setSync(null);
@@ -63,7 +74,7 @@ function renderAll() {
   populateGoalLinks();
   renderTaskList('daily', 'todayList', 'todayEmpty', t => t.due_date === todayStr() || (!t.done && t.due_date && t.due_date < todayStr()));
   renderTaskList('daily', 'tomorrowList', 'tomorrowEmpty', t => t.due_date === tomorrowStr());
-  renderTaskList('weekly', 'weekList', 'weekEmpty');
+  renderTaskList('weekly', 'weekList', 'weekEmpty', t => !t.due_date || t.due_date === weekStartStr() || (!t.done && t.due_date < weekStartStr()));
   renderTaskList('monthly', 'monthList', 'monthEmpty');
   renderTaskList('work_now', 'worknowList', 'worknowEmpty');
   renderTaskList('work_later', 'worklaterList', 'worklaterEmpty');
@@ -136,7 +147,10 @@ function startEditTask(id) {
 
 function taskItemHtml(t) {
   const goal = goals.find(g => g.id === t.goal_id);
-  const overdue = t.timeframe === 'daily' && t.due_date && t.due_date < todayStr() && !t.done;
+  const overdue = !t.done && t.due_date && (
+    (t.timeframe === 'daily' && t.due_date < todayStr()) ||
+    (t.timeframe === 'weekly' && t.due_date < weekStartStr())
+  );
   return `
     <li class="task-item ${t.done ? 'done' : ''}">
       <div class="check ${t.done ? 'done' : ''}" data-id="${t.id}"></div>
@@ -296,7 +310,7 @@ document.getElementById('tomorrowInput').addEventListener('keydown', e => { if (
 document.getElementById('weekAdd').addEventListener('click', () => {
   const input = document.getElementById('weekInput');
   const goalId = document.getElementById('weekGoalLink').value;
-  addTask('weekly', input.value, goalId, null);
+  addTask('weekly', input.value, goalId, weekStartStr());
   input.value = '';
 });
 document.getElementById('weekInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('weekAdd').click(); });
